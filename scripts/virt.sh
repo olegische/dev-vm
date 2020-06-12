@@ -2,6 +2,8 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+BRIDGE="br0"
+VM_MAC="52:54:00:8a:ea:85"
 VM_DIR="~/vm"
 DEB_ISO="debian-10.4.0-amd64-netinst.iso"
 BUILDER="qemu"
@@ -23,8 +25,7 @@ ARG_PRIORITY=""
 # so we need to set them in extra args
 #ARG_NETCFG="netcfg/get_hostname?=$HOSTNAME netcfg/get_domain?=$DOMAIN" # with questions
 ARG_NETCFG="netcfg/get_hostname=$HOSTNAME netcfg/get_domain=$DOMAIN"
-ARG_URL="preseed/url=https://gl.dev.boquar.com/olegrom/site-config/-/raw/master/bootstrap/preseed/${PRESEED}.cfg"
-#ARG_URL="auto url=https://gl.dev.boquar.com/olegrom/site-config/-/raw/master/bootstrap/preseed/${PRESEED}.cfg"
+ARG_URL="preseed/url=https://raw.githubusercontent.com/olegische/dev-vm/master/bootstrap/preseed/${PRESEED}.cfg"
 EXTRA_ARGS="$ARG_AUTO $ARG_PRIORITY $ARG_NETCFG $ARG_URL"
 #EXTRA_ARGS="$ARG_NETCFG $ARG_URL"
 
@@ -103,8 +104,13 @@ do
 done
 
 # Sanity checks for error conditions
+RAM=$( free -m | sed -n 2p | awk ' match($0, /Mem:[[:blank:]]*?([0-9]{4})/, m) {print m[1]} ' )
 if [ $cmnd == 'no' ]; then
     error "Please, choose --install or --remove option."
+elif [ ! -d $VM_DIR ]; then
+    error "Can't find vm directory"
+elif [ $VM_RAM -gt $RAM ]; then
+    error "PC doesn't have enought RAM for run virtual machine"
 fi
 
 function virt() {
@@ -117,7 +123,7 @@ function virt() {
             --extra-args=\"$EXTRA_ARGS\" \
             --memory $VM_RAM \
             --vcpus $VM_CPU_NUM \
-            --network bridge=br0,mac=52:54:00:8a:ea:85 \
+            --network bridge=${BRIDGE},mac=${VM_MAC} \
             --disk ${DISK_IMAGE},format=qcow2,size=${DISK_IMAGE_SIZE} \
             --graphics vnc \
             --os-variant debian10"
