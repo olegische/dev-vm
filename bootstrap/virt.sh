@@ -4,7 +4,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 BRIDGE="br0"
 VM_MAC="52:54:00:8a:ea:85"
-VM_DIR="~/vm"
+VM_DIR="/home/${SUDO_USER}/vm"
 DEB_ISO="debian-10.4.0-amd64-netinst.iso"
 BUILDER="qemu"
 HOSTNAME="dev"
@@ -104,7 +104,7 @@ do
 done
 
 # Sanity checks for error conditions
-RAM=$( free -m | sed -n 2p | awk ' match($0, /Mem:[[:blank:]]*?([0-9]{4})/, m) {print m[1]} ' )
+RAM=$( free -m | sed -n 2p | tr -s ' ' | cut -d ' ' -f 2 )
 if [ $cmnd == 'no' ]; then
     error "Please, choose --install or --remove option."
 elif [ ! -d $VM_DIR ]; then
