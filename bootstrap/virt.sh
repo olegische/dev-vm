@@ -2,21 +2,10 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-BRIDGE="br0"
-VM_MAC="52:54:00:8a:ea:85"
-VM_DIR="/home/${SUDO_USER}/vm"
-DEB_ISO="debian-10.4.0-amd64-netinst.iso"
-BUILDER="qemu"
-HOSTNAME="dev"
-DOMAIN="domain.local"
-VM_NAME=$HOSTNAME
-VM_RAM="4096"
-VM_CPU_NUM="2"
-DISK_IMAGE="${VM_DIR}/img/${VM_NAME}.qcow2"
-DISK_IMAGE_SIZE="10"
-PRESEED_NM="preseed"
-PRESEED="${PRESEED_NM}-${BUILDER}-${DISK_IMAGE_SIZE}gb"
-INSTALLER_LOCATION="${VM_DIR}/iso/${DEB_ISO}"
+source $SCRIPT_DIR/virt-config.sh
+source $SCRIPT_DIR/lib/const.sh
+source $SCRIPT_DIR/lib/common.sh
+
 ARG_AUTO="auto=true"
 #ARG_PRIORITY="priority=critcal"
 #ARG_PRIORITY="priority=high"
@@ -24,13 +13,12 @@ ARG_PRIORITY=""
 # hostname and domain command loads from preseed after network options,
 # so we need to set them in extra args
 #ARG_NETCFG="netcfg/get_hostname?=$HOSTNAME netcfg/get_domain?=$DOMAIN" # with questions
+ARG_USER="passwd/user-fullname=$USER_DSC passwd/username=$USER_NM"
 ARG_NETCFG="netcfg/get_hostname=$HOSTNAME netcfg/get_domain=$DOMAIN"
 ARG_URL="preseed/url=https://raw.githubusercontent.com/olegische/dev-vm/master/bootstrap/preseed/${PRESEED}.cfg"
-EXTRA_ARGS="$ARG_AUTO $ARG_PRIORITY $ARG_NETCFG $ARG_URL"
+EXTRA_ARGS="$ARG_AUTO $ARG_PRIORITY $ARG_NETCFG $ARG_URL $ARG_USER"
 #EXTRA_ARGS="$ARG_NETCFG $ARG_URL"
 
-source $SCRIPT_DIR/lib/const.sh
-source $SCRIPT_DIR/lib/common.sh
 
 USAGE_TXT="Install or remove VM"
 
